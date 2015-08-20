@@ -111,6 +111,10 @@ class ApplicationController < ActionController::Base
       if session[:user_id]
         # existing session
         user = (User.active.find(session[:user_id]) rescue nil)
+      elsif request.env['HTTP_REMOTE_USER']
+	user = User.active.find_by_login(request.env['HTTP_REMOTE_USER'])
+        start_user_session(user) if user
+	user  
       elsif autologin_user = try_to_autologin
         user = autologin_user
       elsif params[:format] == 'atom' && params[:key] && request.get? && accept_rss_auth?
